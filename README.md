@@ -23,7 +23,7 @@ This project utilizes Apple's native `CryptoKit` to implement a robust, multi-la
 
 ## 📸 Screenshots
 
-| Room Creation & QR | Chat Interface |
+| Room Creation | Chat Interface |
 |:---:|:---:|
 | <img src="https://github.com/user-attachments/assets/d3eb9f93-d006-423c-aa9c-2a770294da41" width="200"> | <img src="https://github.com/user-attachments/assets/f84b23c1-079f-40f2-8c25-64f83df927b1" width="200"> <img src="https://github.com/user-attachments/assets/55fe24df-253f-4299-bd12-b02fcea32f46" width="200">|
 
