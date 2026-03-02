@@ -4,6 +4,8 @@ A lightweight, strictly educational Proof of Concept (PoC) demonstrating a real-
 
 This project explores how to build a "stateless, blind router" server paired with a client-side cryptographic engine, ensuring that the server never has access to the message contents or the decryption keys.
 
+Known Issues: Background state management is not fully implemented yet.
+
 ## 🚀 Key Features
 
 * **Real-time Communication:** Native `URLSessionWebSocketTask` for seamless, full-duplex messaging without third-party dependencies.
