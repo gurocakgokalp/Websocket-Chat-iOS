@@ -81,9 +81,9 @@ struct ChatView: View {
             return
         }
         // backende yolladim
-        vm.sendMessage(message: Message(ciphertext: encryptedText.ciphertext, signature: encryptedText.signature, nonce: encryptedText.nonce, tag: encryptedText.tag, username: vm.username, deviceId: deviceId, timestamp: Int(Date().timeIntervalSince1970)))
+        vm.sendMessage(message: Message(type: "chatMessage", ciphertext: encryptedText.ciphertext, signature: encryptedText.signature, nonce: encryptedText.nonce, tag: encryptedText.tag, username: vm.username, deviceId: deviceId, timestamp: Int(Date().timeIntervalSince1970)))
         // bana yolladim, zaten backendden gelen mesaj benimse ignore edicem
-        vm.messages.append(Message(ciphertext: encryptedText.ciphertext, signature: encryptedText.signature, nonce: encryptedText.nonce, tag: encryptedText.tag, username: vm.username, deviceId: deviceId, timestamp: Int(Date().timeIntervalSince1970), plainText: chat))
+        vm.messages.append(Message(type: "chatMessage", ciphertext: encryptedText.ciphertext, signature: encryptedText.signature, nonce: encryptedText.nonce, tag: encryptedText.tag, username: vm.username, deviceId: deviceId, timestamp: Int(Date().timeIntervalSince1970), plainText: chat))
         chat = ""
     }
 }

@@ -80,4 +80,14 @@ actor JSONManager {
             return "unknown"
         }
     }
+    
+    func decodeBaseMassage(text: String) -> BaseMessage? {
+        do {
+            let jsonData = Data(text.utf8)
+            return try JSONDecoder().decode(BaseMessage.self, from: jsonData)
+        } catch {
+            print("error: \(error.localizedDescription)")
+            return nil
+        }
+    }
 }

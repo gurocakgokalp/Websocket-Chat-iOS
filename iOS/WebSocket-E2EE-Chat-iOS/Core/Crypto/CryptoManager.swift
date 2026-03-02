@@ -36,7 +36,7 @@ class CryptoManager {
             }
             let agreementPublic = try KeyManager.shared.getAgreementPrivateKey().publicKey
             let signPublic = try KeyManager.shared.getSignPrivateKey().publicKey
-            return clientKeyData(agreementPKey: agreementPublic.rawRepresentation.base64EncodedString(), signPKey: signPublic.rawRepresentation.base64EncodedString(), deviceId: deviceId)
+            return clientKeyData(type: "keyData", agreementPKey: agreementPublic.rawRepresentation.base64EncodedString(), signPKey: signPublic.rawRepresentation.base64EncodedString(), deviceId: deviceId)
         } catch {
             print("[prepareHandshake] error: \(error.localizedDescription)")
             return nil

@@ -23,3 +23,9 @@ enum RoomManagerState: String, Identifiable {
 
 }
 
+enum MessageType: String {
+    case partipicantData = "participantData"
+    case keyData = "keyData"
+    case chatMessage = "chatMessage"
+}
+

@@ -123,7 +123,7 @@ class MainViewModel: ObservableObject {
     
     func sendParticipantData(deviceId: String, username: String) {
         do {
-            let jsonData = try JSONEncoder().encode(ParticipantData(username: username, deviceID: deviceId))
+            let jsonData = try JSONEncoder().encode(ParticipantData(type: "participantData", username: username, deviceID: deviceId))
             guard let jsonText = String(data: jsonData, encoding: .utf8) else {
                 print("error when converting json data to string")
                 return

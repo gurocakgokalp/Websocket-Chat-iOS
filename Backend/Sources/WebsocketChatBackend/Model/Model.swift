@@ -18,7 +18,6 @@ struct ParticipantData: Codable {
 }
 
 struct handshakeReady: Codable {
-    let type: String
     let peerName: String
     let status: String
     let sharedSalt: String
@@ -51,6 +50,6 @@ struct Room {
     var clientKeyData: [clientKeyData]
 }
 
-struct BaseMessage {
+struct BaseMessage: Codable {
     let type: String
 }
