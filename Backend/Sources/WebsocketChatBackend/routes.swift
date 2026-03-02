@@ -28,7 +28,8 @@ func routes(_ app: Application) throws {
                                     }
                                     if let roomMemberCount = await roomManager.getParticipantCount(pin: pin) {
                                         print("\(pin) member count: \(roomMemberCount)")
-                                        await roomManager.broadcastToRoom(pin: pin, message: String(roomMemberCount))
+                                        let memberCountString = await JSONManager.shared.prepareRoomCount(count: roomMemberCount)
+                                        await roomManager.broadcastToRoom(pin: pin, message: memberCountString)
                                             
                                         if roomMemberCount == 2 {
                                             print("room is full now, pre-handshake completed.")
@@ -73,7 +74,8 @@ func routes(_ app: Application) throws {
                                     }
                                     if let roomMemberCount = await roomManager.getParticipantCount(pin: pin) {
                                         print("\(pin) member count: \(roomMemberCount)")
-                                        await roomManager.broadcastToRoom(pin: pin, message: String(roomMemberCount))
+                                        let memberCountString = await JSONManager.shared.prepareRoomCount(count: roomMemberCount)
+                                        await roomManager.broadcastToRoom(pin: pin, message: memberCountString)
                                     }
                                 } else if status == .alreadyExist {
                                     print("the session code user is trying to create already exists")

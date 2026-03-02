@@ -72,22 +72,11 @@ class MainViewModel: ObservableObject {
                         }
                         print(state.rawValue)
                     } else {
-                        if let memberCount = Int(text) {
-                            DispatchQueue.main.async {
-                                self.roomMemberCount = memberCount
-                            }
-                        } else {
-                            if let model = JSONManager.shared.decodeReadyCallAndGetPeerName(jsonText: text) {
-                                // handshake islemini baslatacagiz. ama once chat ux ui oturt.
-                                if model.status == "ready" {
-                                    CryptoManager.shared.setSalt(saltS: model.sharedSalt)
-                                    self.sendClientKeyData()
-                                }
-                                DispatchQueue.main.async {
-                                    self.peerUsername = model.peerName
-                                }
-                                
-                            } else {
+                        if let baseMessage = JSONManager.shared.decodeBaseMassage(text: text) {
+                            print("received baseMessage")
+                            print("messageType: \(baseMessage.type)")
+                            switch BaseMessageType(rawValue: baseMessage.type) {
+                            case .chatMessage:
                                 if let message = JSONManager.shared.decodeChatMessage(text: text) {
                                     if let deviceId = IDManager.shared.getDeviceId() {
                                         // mesaj bana aitse ignorela
@@ -97,15 +86,33 @@ class MainViewModel: ObservableObject {
                                             }
                                         }
                                     }
-                                } else {
-                                    if let peerKeyData = JSONManager.shared.decodePeerKeyData(text: text) {
-                                        print("recevied peer key data, starting handshake")
-                                        CryptoManager.shared.handshake(peerKeyData: peerKeyData)
-                                    } else {
-                                        print("unknown chat message received")
+                                }
+                            case .handshakeReady:
+                                if let model = JSONManager.shared.decodeReadyCallAndGetPeerName(jsonText: text) {
+                                    if model.status == "ready" {
+                                        CryptoManager.shared.setSalt(saltS: model.sharedSalt)
+                                        self.sendClientKeyData()
+                                    }
+                                    DispatchQueue.main.async {
+                                        self.peerUsername = model.peerName
                                     }
                                 }
+                            case .keyData:
+                                if let peerKeyData = JSONManager.shared.decodePeerKeyData(text: text) {
+                                    print("recevied peer key data, starting handshake")
+                                    CryptoManager.shared.handshake(peerKeyData: peerKeyData)
+                                }
+                            case .roomMemberCount:
+                                if let memberCount = JSONManager.shared.decodeMemberCount(text: text) {
+                                    DispatchQueue.main.async {
+                                        self.roomMemberCount = memberCount.count
+                                    }
+                                }
+                            case .none:
+                                print("received message has unknown type")
                             }
+                        } else {
+                            print("received message has unknown type")
                         }
                     }
                 case .data(let data):

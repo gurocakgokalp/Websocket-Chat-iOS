@@ -52,3 +52,12 @@ struct encryptedMessageText {
     let nonce: String
     let tag: String
 }
+
+struct BaseMessage: Codable {
+    let type: String
+}
+
+struct roomMemberCount: Codable {
+    let type: String
+    let count: Int
+}

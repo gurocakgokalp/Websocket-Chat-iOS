@@ -48,3 +48,10 @@ enum CryptoError: Error {
     case sealedBoxCreating(String)
     case error(String)
 }
+
+enum BaseMessageType: String {
+    case handshakeReady = "handshakeReady"
+    case chatMessage = "chatMessage"
+    case keyData = "keyData"
+    case roomMemberCount = "roomMemberCount"
+}

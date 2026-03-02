@@ -66,4 +66,24 @@ class JSONManager {
             return nil
         }
     }
+    
+    func decodeBaseMassage(text: String) -> BaseMessage? {
+        do {
+            let jsonData = Data(text.utf8)
+            return try JSONDecoder().decode(BaseMessage.self, from: jsonData)
+        } catch {
+            print("error: \(error.localizedDescription)")
+            return nil
+        }
+    }
+    
+    func decodeMemberCount(text: String) -> roomMemberCount? {
+        do {
+            let jsonData = Data(text.utf8)
+            return try JSONDecoder().decode(roomMemberCount.self, from: jsonData)
+        } catch {
+            print("error: \(error.localizedDescription)")
+            return nil
+        }
+    }
 }

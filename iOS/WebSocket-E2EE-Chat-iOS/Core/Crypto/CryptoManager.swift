@@ -17,6 +17,7 @@ class CryptoManager {
     func setSalt(saltS: String) {
         let saltData = Data(saltS.utf8)
         self.salt = saltData
+        print("salt setted succesfully")
     }
     
     func getSalt() -> Data? {

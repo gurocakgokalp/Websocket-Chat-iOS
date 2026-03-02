@@ -24,7 +24,7 @@ actor JSONManager {
     
     func prepareReadyMessage(peerName: String, sharedSalt: String) -> String {
         do {
-            let jsonData = try JSONEncoder().encode(handshakeReady(peerName: peerName, status: "ready", sharedSalt: sharedSalt))
+            let jsonData = try JSONEncoder().encode(handshakeReady(type: "handshakeReady", peerName: peerName, status: "ready", sharedSalt: sharedSalt))
             guard let jsonText = String(data: jsonData, encoding: .utf8) else {
                 return "unknown"
             }
@@ -49,6 +49,18 @@ actor JSONManager {
     func prepareChatMessages(messages: [Message]) -> String {
         do {
             let jsonData = try JSONEncoder().encode(messages)
+            guard let jsonText = String(data: jsonData, encoding: .utf8) else {
+                return "unknown"
+            }
+            return jsonText
+        } catch {
+            print("encode error: \(error.localizedDescription)")
+            return "unknown"
+        }
+    }
+    func prepareRoomCount(count: Int) -> String {
+        do {
+            let jsonData = try JSONEncoder().encode(roomMemberCount(type: "roomMemberCount", count: count))
             guard let jsonText = String(data: jsonData, encoding: .utf8) else {
                 return "unknown"
             }
