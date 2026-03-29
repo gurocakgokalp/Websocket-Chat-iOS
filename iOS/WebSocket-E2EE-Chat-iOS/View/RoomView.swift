@@ -132,11 +132,11 @@ struct RoomView: View {
                         }
                         ToolbarItem(placement: .topBarTrailing) {
                             HStack {
-                                Image(systemName: "person.fill")
+                                Image(systemName: "wifi.badge.lock")
                                     .foregroundStyle(.green.gradient)
-                                    .font(.caption)
-                                Text("\(vm.roomMemberCount)")
-                            }.padding(.horizontal, 7)
+                                    //.font(.caption)
+                                //Text("\(vm.roomMemberCount)")
+                            }//.padding(.horizontal, 7)
                         }
                     } else {
                         ToolbarItem(placement: .topBarLeading) {
