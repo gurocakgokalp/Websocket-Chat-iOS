@@ -1,44 +1,72 @@
-# End-to-End Encrypted WebSocket Chat (PoC)
+# E2EE Chat iOS
 
-A lightweight, strictly educational Proof of Concept (PoC) demonstrating a real-time, end-to-end encrypted (E2EE) messaging architecture using **iOS (SwiftUI/CryptoKit)** for the client and **Vapor** for the backend. 
+Real-time end-to-end encrypted messaging over WebSocket. The Vapor backend 
+acts as a blind router — it never has access to message contents or 
+cryptographic keys.
 
-This project explores how to build a "stateless, blind router" server paired with a client-side cryptographic engine, ensuring that the server never has access to the message contents or the decryption keys.
+> **Disclaimer:** Educational and portfolio use only. Not audited.
+> Do not use in production.
 
-Known Issues: Background state management is not fully implemented yet.
+## Why "blind router"?
 
-## 🚀 Key Features
+Most messaging architectures trust the server. This project inverts that 
+assumption: the server holds only ciphertext and connection state. 
+Even if the server is compromised, message contents remain private.
 
-* **Real-time Communication:** Native `URLSessionWebSocketTask` for seamless, full-duplex messaging without third-party dependencies.
-* **Stateless Backend (Vapor):** The server acts purely as a WebSocket router. It holds connections in RAM via Swift Actors, performs zero logging, and has no database. When the session ends, the room evaporates.
-* **Session PIN Access:** Easy and intuitive room joining mechanism using generated PINs.
-* **Modern UI:** Built entirely with SwiftUI, featuring a clean, dark-themed, and responsive interface.
-
-## 🔐 Cryptography & Architecture
-
-This project utilizes Apple's native `CryptoKit` to implement a robust, multi-layered security flow:
-
-1. **Key Generation:** Each device generates its own `P256.Signing.PrivateKey` and `Curve25519.KeyAgreement.PrivateKey` locally.
-2. **Key Exchange (Handshake):** Upon joining a room, clients exchange their public keys via the Vapor server. 
-3. **Symmetric Key Derivation:** Using the Diffie-Hellman key exchange method, both devices compute a shared secret. This secret is then passed through an **HKDF** (HMAC-based Extract-and-Expand Key Derivation Function) with SHA256 to generate a cryptographically strong, 32-byte `SymmetricKey`.
-4. **Encryption (AES-GCM):** All outgoing messages are sealed using `AES-GCM` before leaving the device. The payload sent to the server is purely ciphertext.
-5. **Signature & Verification (ECDSA):** To prevent tampering, the combined digest of the encrypted message is signed using the sender's P256 private key. The receiver verifies this `ECDSASignature` before attempting to decrypt the payload.
-
-## 📸 Screenshots
+## Screenshots
 
 | Room Creation | Chat Interface |
 |:---:|:---:|
 | <img src="https://github.com/user-attachments/assets/d3eb9f93-d006-423c-aa9c-2a770294da41" width="200"> | <img src="https://github.com/user-attachments/assets/f84b23c1-079f-40f2-8c25-64f83df927b1" width="200"> <img src="https://github.com/user-attachments/assets/55fe24df-253f-4299-bd12-b02fcea32f46" width="200">|
 
-## 🛠 Tech Stack
+## Cryptographic Architecture
 
-* **Frontend:** Swift, SwiftUI, Combine
-* **Security:** CryptoKit, LocalAuthentication
-* **Backend:** Server-Side Swift (Vapor), WebSockets
+| Primitive | Implementation |
+|---|---|
+| Key Generation | P256 signing + Curve25519 key agreement — generated locally per session |
+| Key Exchange | Ephemeral ECDH via Diffie-Hellman |
+| Key Derivation | HKDF (SHA-256), 32-byte symmetric key |
+| Encryption | AES-GCM authenticated encryption |
+| Signing | ECDSA (P256) — tamper detection before decryption |
 
-## ⚠️ Disclaimer
+## Security Decisions
 
-**This project is a Proof of Concept (PoC) created strictly for educational and portfolio purposes to demonstrate WebSocket and CryptoKit implementations. It has not been audited by security professionals and should NOT be used for actual sensitive, private, or production-level communications. The author assumes no responsibility for any misuse of this software.**
+**Why stateless backend?** Storing messages server-side creates a honeypot. 
+A stateless router means there's nothing valuable to steal — when the 
+session ends, the room evaporates.
 
-## 📄 License
+**Why ECDH + HKDF instead of a static shared key?** Each session derives 
+a fresh symmetric key. Compromising one session doesn't affect others.
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+**Why sign before decrypt?** ECDSA verification happens before AES-GCM 
+decryption. A tampered or forged message is rejected immediately without 
+touching the decryption layer.
+
+## System Flow
+
+1. **Room creation** — Host generates a PIN, server assigns a room.
+2. **Key exchange** — Both clients exchange public keys via the server.
+3. **Key derivation** — Each client independently derives the same 
+symmetric key via HKDF. The server never sees this key.
+4. **Messaging** — Messages are signed and encrypted client-side. 
+Server routes ciphertext only.
+5. **Decryption** — Receiver verifies signature, then decrypts locally.
+
+## Running with Docker
+```bash
+cd Backend
+docker compose up
+```
+
+Then open `iOS/` in Xcode and run on Simulator.
+
+## Tech Stack
+
+- **iOS:** Swift, SwiftUI, CryptoKit, URLSessionWebSocketTask
+- **Backend:** Vapor (Server-side Swift), Swift Actors, Docker
+
+## Known Limitations
+
+- Background state management not fully implemented.
+- No persistent storage by design — sessions are ephemeral.
+- Not security audited.
