@@ -79,7 +79,6 @@ class MainViewModel: ObservableObject {
                             case .chatMessage:
                                 if let message = JSONManager.shared.decodeChatMessage(text: text) {
                                     if let deviceId = IDManager.shared.getDeviceId() {
-                                        // mesaj bana aitse ignorela
                                         if message.deviceId != deviceId {
                                             DispatchQueue.main.async {
                                                 self.messages.append(message)

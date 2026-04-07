@@ -29,7 +29,7 @@ class CryptoManager {
         }
     }
     
-    func getClientKeyData() -> clientKeyData? {
+    func getClientKeyData() -> ClientKeyData? {
         do {
             guard let deviceId = IDManager.shared.getDeviceId() else {
                 print("[prepareHandshake] error: deviceId not found")
@@ -37,7 +37,7 @@ class CryptoManager {
             }
             let agreementPublic = try KeyManager.shared.getAgreementPrivateKey().publicKey
             let signPublic = try KeyManager.shared.getSignPrivateKey().publicKey
-            return clientKeyData(type: "keyData", agreementPKey: agreementPublic.rawRepresentation.base64EncodedString(), signPKey: signPublic.rawRepresentation.base64EncodedString(), deviceId: deviceId)
+            return ClientKeyData(type: "keyData", agreementPKey: agreementPublic.rawRepresentation.base64EncodedString(), signPKey: signPublic.rawRepresentation.base64EncodedString(), deviceId: deviceId)
         } catch {
             print("[prepareHandshake] error: \(error.localizedDescription)")
             return nil
@@ -49,7 +49,7 @@ class CryptoManager {
         return try signPrivateKey.signature(for: digest)
     }
     
-    func handshake(peerKeyData: clientKeyData) {
+    func handshake(peerKeyData: ClientKeyData) {
         do {
             let agreementPriKey = try KeyManager.shared.getAgreementPrivateKey()
             let peerAgreementPubKey = try B64toAgreementPKey(agreementPB64: peerKeyData.agreementPKey)
@@ -68,7 +68,7 @@ class CryptoManager {
     }
     
     // error throwing yapcam daha
-    func encryptMessageText(text: String) -> encryptedMessageText? {
+    func encryptMessageText(text: String) -> EncryptedMessageText? {
         print("starting encrypt message")
         let textData = Data(text.utf8)
         
@@ -83,7 +83,7 @@ class CryptoManager {
             }
             let signature = try sign(digest: digest)
             
-            return encryptedMessageText(ciphertext: sealedBox.ciphertext.base64EncodedString(), signature: signature.rawRepresentation.base64EncodedString(), nonce: sealedBox.nonce.withUnsafeBytes {Data($0)}.base64EncodedString(), tag: sealedBox.tag.base64EncodedString())
+            return EncryptedMessageText(ciphertext: sealedBox.ciphertext.base64EncodedString(), signature: signature.rawRepresentation.base64EncodedString(), nonce: sealedBox.nonce.withUnsafeBytes {Data($0)}.base64EncodedString(), tag: sealedBox.tag.base64EncodedString())
         } catch {
             print("[encryptMessageText] error: \(error.localizedDescription)")
             return nil

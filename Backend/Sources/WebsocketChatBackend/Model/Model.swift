@@ -17,7 +17,7 @@ struct ParticipantData: Codable {
     let deviceID: String
 }
 
-struct handshakeReady: Codable {
+struct HandshakeReady: Codable {
     let type: String
     let peerName: String
     let status: String
@@ -38,7 +38,7 @@ struct Message: Codable, Identifiable {
 
 }
 
-struct clientKeyData: Codable {
+struct ClientKeyData: Codable {
     let type: String
     let agreementPKey: String
     let signPKey: String
@@ -48,10 +48,10 @@ struct clientKeyData: Codable {
 struct Room {
     var partipicants: [Participant]
     var salt: String
-    var clientKeyData: [clientKeyData]
+    var clientKeyData: [ClientKeyData]
 }
 
-struct roomMemberCount: Codable {
+struct RoomMemberCount: Codable {
     let type: String
     let count: Int
 }

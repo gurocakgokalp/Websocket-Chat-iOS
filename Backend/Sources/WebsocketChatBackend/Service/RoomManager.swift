@@ -8,12 +8,7 @@ import Vapor
 
 actor RoomManager {
     var rooms: [String: Room] = [:]
-    
-    /*
-    var rooms: [String: [Participant]] = [:]
-    var roomsSalt: [String: String] = [:]
-    var roomsKeyData: [String: [clientKeyData]] = [:]
-     */
+    let logger = Logger(label: "room.manager")
     
     func addConnectionToRoom(pin: String, participant: Participant) -> RoomManagerState {
         if var room = rooms[pin] {
@@ -29,7 +24,7 @@ actor RoomManager {
         }
     }
     
-    func addKeyDataToRoom(pin: String, clientKeyData: clientKeyData) -> Int? {
+    func addKeyDataToRoom(pin: String, clientKeyData: ClientKeyData) -> Int? {
         if var room = rooms[pin] {
             room.clientKeyData.append(clientKeyData)
             rooms[pin] = room
@@ -115,7 +110,6 @@ actor RoomManager {
         }
         if room.partipicants.count == 0 {
             rooms.removeValue(forKey: pin)
-            print("room has been closed.")
         }
     }
     

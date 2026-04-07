@@ -8,6 +8,7 @@ import Vapor
 
 actor JSONManager {
     static let shared = JSONManager()
+    let logger = Logger(label: "json.manager")
     
     private init() {}
     
@@ -17,21 +18,20 @@ actor JSONManager {
             let participantData = try JSONDecoder().decode(ParticipantData.self, from: jsonData)
             return Participant(ws: ws, username: participantData.username, deviceId: participantData.deviceID)
         } catch {
-            //print("[decodeParticipantData] decode error: \(error.localizedDescription)")
+            logger.error("Decoding Error: \(error.localizedDescription)", metadata: ["context": "participantData"])
             return nil
         }
     }
     
     func prepareReadyMessage(peerName: String, sharedSalt: String) -> String {
         do {
-            let jsonData = try JSONEncoder().encode(handshakeReady(type: "handshakeReady", peerName: peerName, status: "ready", sharedSalt: sharedSalt))
+            let jsonData = try JSONEncoder().encode(HandshakeReady(type: "handshakeReady", peerName: peerName, status: "ready", sharedSalt: sharedSalt))
             guard let jsonText = String(data: jsonData, encoding: .utf8) else {
                 return "unknown"
             }
             return jsonText
         } catch {
-            //error modeli olusturup yollanabilir, ios tarafinda decode edilerek
-            print("encode error: \(error.localizedDescription)")
+            logger.error("Encoding Error: \(error.localizedDescription)", metadata: ["context": "handshakeReady"])
             return "unknown"
         }
     }
@@ -41,7 +41,7 @@ actor JSONManager {
             let jsonData = Data(text.utf8)
             return try JSONDecoder().decode(Message.self, from: jsonData)
         } catch {
-            //print("[decodeChatMessage] decode error: \(error.localizedDescription)")
+            logger.error("Decoding Error: \(error.localizedDescription)", metadata: ["context": "chatMessage"])
             return nil
         }
     }
@@ -54,33 +54,34 @@ actor JSONManager {
             }
             return jsonText
         } catch {
-            print("encode error: \(error.localizedDescription)")
+            logger.error("Encoding Error: \(error.localizedDescription)", metadata: ["context": "chatMessage"])
             return "unknown"
         }
     }
     func prepareRoomCount(count: Int) -> String {
         do {
-            let jsonData = try JSONEncoder().encode(roomMemberCount(type: "roomMemberCount", count: count))
+            let jsonData = try JSONEncoder().encode(RoomMemberCount(type: "roomMemberCount", count: count))
             guard let jsonText = String(data: jsonData, encoding: .utf8) else {
                 return "unknown"
             }
             return jsonText
         } catch {
-            print("encode error: \(error.localizedDescription)")
+            logger.error("Encoding Error: \(error.localizedDescription)", metadata: ["context": "RoomMemberCount"])
             return "unknown"
         }
     }
     
-    func decodeKeyData(text: String) -> clientKeyData? {
+    func decodeKeyData(text: String) -> ClientKeyData? {
         do {
             let jsonData = Data(text.utf8)
-            return try JSONDecoder().decode(clientKeyData.self, from: jsonData)
+            return try JSONDecoder().decode(ClientKeyData.self, from: jsonData)
         } catch {
             //print("[decodePeerKeyData] decode error: \(error.localizedDescription)")
+            logger.error("Decoding Error: \(error.localizedDescription)", metadata: ["context": "keyData"])
             return nil
         }
     }
-    func prepareKeyData(clientKeyData: clientKeyData) -> String {
+    func prepareKeyData(clientKeyData: ClientKeyData) -> String {
         do {
             let jsonData = try JSONEncoder().encode(clientKeyData)
             guard let jsonText = String(data: jsonData, encoding: .utf8) else {
@@ -88,7 +89,7 @@ actor JSONManager {
             }
             return jsonText
         } catch {
-            print("encode error: \(error.localizedDescription)")
+            logger.error("Encoding Error: \(error.localizedDescription)", metadata: ["context": "keyData"])
             return "unknown"
         }
     }
@@ -98,7 +99,7 @@ actor JSONManager {
             let jsonData = Data(text.utf8)
             return try JSONDecoder().decode(BaseMessage.self, from: jsonData)
         } catch {
-            print("error: \(error.localizedDescription)")
+            logger.error("Decoding Error: \(error.localizedDescription)", metadata: ["context": "baseMessage"])
             return nil
         }
     }

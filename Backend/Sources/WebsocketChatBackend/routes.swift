@@ -11,81 +11,71 @@ func routes(_ app: Application) throws {
         
         ws.onText { ws, text in
             if let baseMessage = await JSONManager.shared.decodeBaseMassage(text: text) {
-                print("received baseMessage")
-                print("messageType: \(baseMessage.type)")
                 switch MessageType(rawValue: baseMessage.type) {
                 case .partipicantData:
                     if let participant = await JSONManager.shared.decodeParticipantData(ws: ws, jsonText: text) {
                         Task {
                             if createOrJoin == "join" {
                                 let status = await roomManager.addConnectionToRoom(pin: pin, participant: participant)
-                                print("tried add connection to room: \(status.rawValue)")
                                 if status == .joined {
                                     if let username = await roomManager.getUsername(ws: ws) {
-                                        print("\(username) joined to room (\(pin))")
+                                        req.logger.info("\(username) Joined", metadata: ["pin": .string(pin)])
                                     } else {
-                                        print("unknown user joined to room (\(pin))")
+                                        req.logger.info("Unknown Joined", metadata: ["pin": .string(pin)])
                                     }
                                     if let roomMemberCount = await roomManager.getParticipantCount(pin: pin) {
-                                        print("\(pin) member count: \(roomMemberCount)")
                                         let memberCountString = await JSONManager.shared.prepareRoomCount(count: roomMemberCount)
                                         await roomManager.broadcastToRoom(pin: pin, message: memberCountString)
                                             
-                                        if roomMemberCount == 2 {
-                                            print("room is full now, pre-handshake completed.")
-                                            // burada gonderecegiz.
-                                            
+                                        if roomMemberCount >= 2 {
+                                            req.logger.debug("Room is Full, Pre-Handshake Completed", metadata: ["pin": .string(pin)])
                                             if let partipicants = await roomManager.rooms[pin]?.partipicants {
                                                 let first = partipicants[0]
                                                 let second = partipicants[1]
                                                 
                                                 if let salt = await roomManager.getSalt(pin: pin) {
                                                     let messageToFirst = await JSONManager.shared.prepareReadyMessage(peerName: second.username, sharedSalt: salt)
-                                                    print("\"ready message\" sent to \(first.username) (\(first.deviceId))")
+                                                    req.logger.debug("Handshake Request Sent", metadata: ["deviceId": .string(first.deviceId)])
                                                     let messageToSecond = await JSONManager.shared.prepareReadyMessage(peerName: first.username, sharedSalt: salt)
-                                                    print("\"ready message\" sent to \(second.username) (\(second.deviceId))")
+                                                    req.logger.debug("Handshake Request Sent", metadata: ["deviceId": .string(second.deviceId)])
                                                     try await first.ws.send(messageToFirst)
                                                     try await second.ws.send(messageToSecond)
                                                 } else {
-                                                    print("failure: something went wrong when getting salt so couldn't send \"ready message\"")
+                                                    req.logger.error("Cannot Requset Handshake", metadata: ["context": "salt"])
                                                 }
                                             }
                                             
                                         }
                                     }
                                 } else if status == .cantFound {
-                                    print("room not found (\(pin))")
+                                    req.logger.warning("Room doesnot exist", metadata: ["pin": .string(pin)])
                                 }
-                                print("sending status.rawValue to socket")
                                 try await ws.send(status.rawValue)
                                 if status != .joined {
-                                    print("room (\(pin)) is full or not found, socket will be closed...")
+                                    req.logger.warning("Cannot join room", metadata: ["pin": .string(pin), "reason": "Room is full or not found."])
                                     try await Task.sleep(for: .seconds(1))
                                     try await ws.close()
                                 }
                             } else if createOrJoin == "create" {
                                 let status = await roomManager.createRoom(pin: pin, participant: participant)
-                                print("trying create room (\(pin)), status: \(status.rawValue)")
                                 if status == .created {
                                     if let username = await roomManager.getUsername(ws: ws) {
-                                        print("\(username) created room (\(pin))")
+                                        req.logger.info("Created Room", metadata: ["pin": .string(pin), "byWho": .string(username)])
                                     } else {
-                                        print("unknown user created room (\(pin))")
+                                        req.logger.info("Created Room", metadata: ["pin": .string(pin), "byWho": "UNKNOWN"])
                                     }
                                     if let roomMemberCount = await roomManager.getParticipantCount(pin: pin) {
-                                        print("\(pin) member count: \(roomMemberCount)")
                                         let memberCountString = await JSONManager.shared.prepareRoomCount(count: roomMemberCount)
                                         await roomManager.broadcastToRoom(pin: pin, message: memberCountString)
                                     }
                                 } else if status == .alreadyExist {
-                                    print("the session code user is trying to create already exists")
+                                    req.logger.warning("Cannot Create Room", metadata: ["pin": .string(pin), "reason": "The session code user is trying to create already exists"])
                                 }
-                                print("sending status.rawValue to socket")
                                 try await ws.send(status.rawValue)
                             }
                         }
                     } else {
-                        print("protocol error (participantData)")
+                        req.logger.error("Unknown Content", metadata: ["context": "ParticipantData"])
                     }
                 case .chatMessage:
                     Task {
@@ -104,9 +94,7 @@ func routes(_ app: Application) throws {
                                             let textToSec = await JSONManager.shared.prepareKeyData(clientKeyData: firstKeyData)
                                             let textToFirst = await JSONManager.shared.prepareKeyData(clientKeyData: secKeyData)
                                             
-                                            print("sending peer user key data to \(room.partipicants[0].username)")
                                             try await room.partipicants[0].ws.send(textToFirst)
-                                            print("sending peer user key data to \(room.partipicants[1].username)")
                                             try await room.partipicants[1].ws.send(textToSec)
                                         }
                                     }
@@ -116,10 +104,10 @@ func routes(_ app: Application) throws {
                             }
                         }
                     } else {
-                        print("protocol error (clientKeyData)")
+                        req.logger.error("Unknown Content", metadata: ["context": "ClientKeyData"])
                     }
                 case .none:
-                    print("received message has unknown type.")
+                    req.logger.warning("Unknown Content")
                 }
             }
         }
@@ -129,15 +117,14 @@ func routes(_ app: Application) throws {
                 await roomManager.removeKeyDataFromRoom(pin: pin, ws: ws)
                 
                 if let username = await roomManager.getUsername(ws: ws) {
-                    print("\(username) disconnected.")
+                    req.logger.info("User disconnected.", metadata: ["pin": .string(pin), "username": .string(username)])
                 } else {
-                    print("a unknown device disconnected.")
-                }
+                    req.logger.info("User disconnected.", metadata: ["pin": .string(pin), "username": "UNKNOWN"])                }
                 if let roomMemberCount = await roomManager.getParticipantCount(pin: pin) {
-                    print("\(pin) member count: \(roomMemberCount)")
                     await roomManager.broadcastToRoom(pin: pin, message: String(roomMemberCount))
                 }
                 await roomManager.checkRoomAndClose(pin: pin)
+                req.logger.info("Room Closed", metadata: ["pin": .string(pin)])
             }
             
         }

@@ -103,7 +103,7 @@ class KeyManager {
         }
     }
     
-    func setPeerSigningPubKey(peerKeyData: clientKeyData) {
+    func setPeerSigningPubKey(peerKeyData: ClientKeyData) {
         guard let keyData = Data(base64Encoded: peerKeyData.signPKey) else {
             print("[setPeerSigningPubKey] error (b64decoding)")
             return

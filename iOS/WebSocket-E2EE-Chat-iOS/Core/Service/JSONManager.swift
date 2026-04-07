@@ -11,10 +11,10 @@ class JSONManager {
     
     private init() {}
     
-    func decodeReadyCallAndGetPeerName(jsonText: String) -> handshakeReady? {
+    func decodeReadyCallAndGetPeerName(jsonText: String) -> HandshakeReady? {
         let textData = Data(jsonText.utf8)
         do {
-            return try JSONDecoder().decode(handshakeReady.self, from: textData)
+            return try JSONDecoder().decode(HandshakeReady.self, from: textData)
         } catch {
             //print("[decodeReadyCallAndGetPeerName] decode error: \(error.localizedDescription)")
             return nil
@@ -44,7 +44,7 @@ class JSONManager {
         }
     }
     
-    func prepareClientKeyData(data: clientKeyData) -> String {
+    func prepareClientKeyData(data: ClientKeyData) -> String {
         do {
             let data = try JSONEncoder().encode(data)
             guard let jsonText = String(data: data, encoding: .utf8) else {
@@ -57,10 +57,10 @@ class JSONManager {
         }
     }
     
-    func decodePeerKeyData(text: String) -> clientKeyData? {
+    func decodePeerKeyData(text: String) -> ClientKeyData? {
         do {
             let jsonData = Data(text.utf8)
-            return try JSONDecoder().decode(clientKeyData.self, from: jsonData)
+            return try JSONDecoder().decode(ClientKeyData.self, from: jsonData)
         } catch {
             //print("[decodePeerKeyData] decode error: \(error.localizedDescription)")
             return nil
@@ -77,10 +77,10 @@ class JSONManager {
         }
     }
     
-    func decodeMemberCount(text: String) -> roomMemberCount? {
+    func decodeMemberCount(text: String) -> RoomMemberCount? {
         do {
             let jsonData = Data(text.utf8)
-            return try JSONDecoder().decode(roomMemberCount.self, from: jsonData)
+            return try JSONDecoder().decode(RoomMemberCount.self, from: jsonData)
         } catch {
             print("error: \(error.localizedDescription)")
             return nil
