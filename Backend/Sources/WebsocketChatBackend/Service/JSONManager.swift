@@ -103,4 +103,10 @@ actor JSONManager {
             return nil
         }
     }
+    
+    func preparePeerDisconnected() async -> String {
+        let message = ["type": "peer_disconnected"]
+        let data = try! JSONSerialization.data(withJSONObject: message)
+        return String(data: data, encoding: .utf8)!
+    }
 }

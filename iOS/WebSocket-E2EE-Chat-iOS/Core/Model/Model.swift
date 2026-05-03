@@ -61,3 +61,8 @@ struct RoomMemberCount: Codable {
     let type: String
     let count: Int
 }
+
+struct AlertWrapper: Identifiable {
+    let message: String
+    var id = UUID()
+}

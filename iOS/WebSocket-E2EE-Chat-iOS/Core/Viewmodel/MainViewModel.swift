@@ -13,6 +13,7 @@ class MainViewModel: ObservableObject {
     @Published var peerUsername: String = ""
     @Published var username: String = ""
     @Published var messages: [Message] = []
+    @Published var alertWrapper: AlertWrapper?
     
     private var webSocketTask: URLSessionWebSocketTask?
     
@@ -42,8 +43,10 @@ class MainViewModel: ObservableObject {
     func disconnect() {
         webSocketTask?.cancel(with: .goingAway, reason: nil)
         DispatchQueue.main.async{
+            self.roomStatus = nil
             self.username = ""
             self.messages = []
+            self.peerUsername = ""
         }
     }
     
@@ -106,6 +109,12 @@ class MainViewModel: ObservableObject {
                                     DispatchQueue.main.async {
                                         self.roomMemberCount = memberCount.count
                                     }
+                                }
+                            case .peerDisconnected:
+                                print("received message is \"peer_disconnect\"")
+                                
+                                DispatchQueue.main.async {
+                                    self.alertWrapper = AlertWrapper(message: "Your peer disconnected. Room will be closing.")
                                 }
                             case .none:
                                 print("received message has unknown type")

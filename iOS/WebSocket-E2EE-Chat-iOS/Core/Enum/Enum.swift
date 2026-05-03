@@ -54,4 +54,5 @@ enum BaseMessageType: String {
     case chatMessage = "chatMessage"
     case keyData = "keyData"
     case roomMemberCount = "roomMemberCount"
+    case peerDisconnected = "peer_disconnected"
 }

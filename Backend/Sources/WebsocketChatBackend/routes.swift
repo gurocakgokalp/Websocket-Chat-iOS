@@ -113,6 +113,8 @@ func routes(_ app: Application) throws {
         }
         ws.onClose.whenSuccess { result in
             Task {
+                let msg = await JSONManager.shared.preparePeerDisconnected()
+                await roomManager.broadcastToRoom(pin: pin, message: msg)
                 await roomManager.removeUserFromRoom(pin: pin, ws: ws)
                 await roomManager.removeKeyDataFromRoom(pin: pin, ws: ws)
                 

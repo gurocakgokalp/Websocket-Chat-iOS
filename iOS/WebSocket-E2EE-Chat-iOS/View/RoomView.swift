@@ -12,6 +12,8 @@ struct RoomView: View {
         
     var pin: String
     @EnvironmentObject var vm: MainViewModel
+    @Environment(\.scenePhase) var scenePhase
+
     
     var body: some View {
         NavigationStack {
@@ -90,8 +92,27 @@ struct RoomView: View {
                         }
                         
                     }
-                }.toolbar {
-                    //duzelt burayi == olarak
+                }.overlay {
+                    if let alert = vm.alertWrapper {
+                        ContentUnavailableView {
+                            Label("Connection Failed", systemImage: "person.2.slash")
+                        } description: {
+                            Text(alert.message)
+                        } actions: {
+                            Button("Leave") {
+                                vm.disconnect()
+                                vm.alertWrapper = nil
+                            }
+                            .buttonStyle(.glassProminent)
+                        }
+                        .background(Color(.secondarySystemBackground).ignoresSafeArea())
+                    }
+                }.onChange(of: scenePhase) { oldPhase , newPhase in
+                    if newPhase == .background {
+                        vm.disconnect()
+                    }
+                }
+                .toolbar {
                     if vm.roomStatus == .joined || vm.roomStatus == .created {
                         ToolbarItem(placement: .topBarLeading) {
                             Button {

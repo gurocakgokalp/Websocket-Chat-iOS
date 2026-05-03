@@ -58,12 +58,14 @@ struct ChatView: View {
                             .onSubmit {
                                 sendMessage()
                             }
-                        Button {
-                            sendMessage()
-                        } label: {
-                            Image(systemName: "paperplane.fill")
-                                .foregroundStyle(.green.gradient)
-                        }.padding(.trailing)
+                        if vm.alertWrapper == nil {
+                            Button {
+                                sendMessage()
+                            } label: {
+                                Image(systemName: "paperplane.fill")
+                                    .foregroundStyle(.green.gradient)
+                            }.padding(.trailing)
+                        }
                     }
                     
                 }
@@ -71,6 +73,9 @@ struct ChatView: View {
         }
     }
     func sendMessage() {
+        guard vm.alertWrapper == nil else {
+            return
+        }
         guard chat != "" else {
             return
         }

@@ -12,6 +12,7 @@ struct ContentView: View {
     
     @Namespace private var animation
     
+    
     @State var sessionPIN: String = ""
     @State var generatedPin: String = ""
     @State var username: String = ""
@@ -56,6 +57,7 @@ struct ContentView: View {
                                 RoundedRectangle(cornerRadius: 16)
                                     .stroke(Color.black.opacity(0.05), lineWidth: 1)
                             )
+                            .frame(height: 60)
                         if roomChoiceE == .join {
                             HeaderView(title: "ROOM CODE", imageName: "number")
                                 .padding(.top)
@@ -80,6 +82,7 @@ struct ContentView: View {
                                     RoundedRectangle(cornerRadius: 16)
                                         .stroke(Color.black.opacity(0.05), lineWidth: 1)
                                 )
+                                .frame(height: 60)
                         }
                     }.padding()
                         .background{
@@ -126,7 +129,16 @@ struct ContentView: View {
                 IDManager.shared.setDeviceId()
             }.onDisappear {
                 vm.disconnect()
-            }.fullScreenCover(item: $vm.roomStatus) { roomStatus in
+            }.toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Close Keyboard") {
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    }
+                    .bold()
+                }
+            }
+            .fullScreenCover(item: $vm.roomStatus) { roomStatus in
                 switch roomChoiceE {
                 case .create:
                     RoomView(pin: generatedPin)
