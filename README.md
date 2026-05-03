@@ -67,6 +67,6 @@ Then open `iOS/` in Xcode and run on Simulator.
 
 ## Known Limitations
 
-- Background state management not fully implemented.
+- Background state management not fully implemented, app disconnects cleanly when backgrounded.
 - No persistent storage by design — sessions are ephemeral.
 - Not security audited.
