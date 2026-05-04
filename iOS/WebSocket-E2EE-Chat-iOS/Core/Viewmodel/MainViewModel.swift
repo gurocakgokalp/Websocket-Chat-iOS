@@ -132,6 +132,10 @@ class MainViewModel: ObservableObject {
                 self.listenForMessages()
             case .failure(let failure):
                 print("websocket listenin' error: \(failure.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.alertWrapper = AlertWrapper(message: failure.localizedDescription)
+                }
+               
             }
         }
     }

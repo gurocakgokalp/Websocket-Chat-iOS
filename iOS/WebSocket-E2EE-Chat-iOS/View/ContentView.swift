@@ -137,7 +137,18 @@ struct ContentView: View {
                     }
                     .bold()
                 }
-            }
+            }.sheet(item: $vm.alertWrapper, content: { wrapper in
+                ContentUnavailableView {
+                    Label("Connection Failed", systemImage: "person.2.slash")
+                } description: {
+                    Text(wrapper.message)
+                } actions: {
+                    Button("Done") {
+                        vm.alertWrapper = nil
+                    }
+                    .buttonStyle(.glassProminent)
+                }
+            })
             .fullScreenCover(item: $vm.roomStatus) { roomStatus in
                 switch roomChoiceE {
                 case .create:
